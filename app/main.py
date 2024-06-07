@@ -1,5 +1,6 @@
 import asyncio
 import os
+import struct
 import sys
 
 
@@ -55,4 +56,76 @@ def set_config():
 
 
 if __name__ == "__main__":
+    with open("../dump.rdb", "rb") as file:
+        dbs = bytearray(file.read())
+        print(dbs)
+
+        dbs = dbs.split(b"\xfb")[1:]
+        for db in dbs:
+            db = db.rsplit(b"\xfe", 1)[0]
+            ht_size = db[0]
+            expiry_size = db[1]
+
+            db = db[3:]
+            i = 0
+            while i < len(db):
+                if hex(db[i]) == "0xfc":
+                    print(0xfc)
+                    # i += 6
+                    print(i, db[i], chr(db[i]), hex(db[i]))
+
+                    px = ""
+                    print(db[i:])
+                    split = db[i:].split(b"\x00\x00\x00\x00")
+                    print(split)
+                    px = split[0]
+                    db = split[1]
+                    print(px)
+                    # while hex(db[i]) != "0x0":
+                    #     print(chr(db[i]))
+                    #     px += chr(db[i])
+                    #     i += 1
+                    # print("px", px)
+                # if hex(db[i]) == "0xfd":
+                #     print(0xfd)
+                #     i += 6
+                #     print(i, db[i], chr(db[i]), hex(db[i]))
+                # print(i, db[i], chr(db[i]), hex(db[i]))
+                # print(db, ht_size, expiry_size)
+                i += 1
+
+        # kick off redis
+        # kick off \xfa
+        # split by \xfe to get databases ->
+        # foreach kick off (collect) \xfb data
+        # foreach iterate over all \xfd
+        # foreach iterate over all \xfc
+        # foreach iterate rest
+
+        # dbs = dbs.split(b"\xfe")[1:]
+        #
+        # for barr in dbs:
+        #     print(barr)
+        #     barr = barr.split(b'\xfb', 1)[1]
+        #     barr = barr.split(b'\x00', 1)[1]
+        #     if barr.startswith(b"\x00"):
+        #         barr = barr.split(b'\x00', 1)[1]
+        #
+        #     curr_index = 0
+        #     curr_end_index = 0
+        #     next_n_bytes = 0
+        #     # print(barr[:8 + 1])
+        #     while curr_end_index < len(barr) - 1:
+        #         next_n_bytes = barr[curr_end_index]
+        #         curr_end_index += 1
+        #
+        #         try:
+        #             result = ""
+        #             while next_n_bytes > 0:
+        #                 next_n_bytes -= 1
+        #                 result += chr(barr[curr_end_index])
+        #                 curr_end_index += 1
+        #             print(result)
+        #         except:
+        #             break
     asyncio.run(main())
